@@ -1,10 +1,5 @@
 #include "wifi.h"
 
-Wifi::Wifi()
-{
-
-}
-
 int Wifi::getCommandLine(const char *command, char* result)
 {
     result[0] = '\0';
@@ -25,7 +20,7 @@ int Wifi::getCommandLine(const char *command, char* result)
 
 int Wifi::getWifiList(char** wire)
 {
-    int i = 0, j = 0;
+    int i = 0;
     char* result = new char[4096];
     char* tmp = new char[64];
 
@@ -34,14 +29,13 @@ int Wifi::getWifiList(char** wire)
     while(strstr(result, "Cell"))
     {
         getField(result, tmp, "Cell", 19, '\n');
-
         strcat(wire[i], tmp);
         getField(result, tmp, "Quality", 8, ' ');
         strcat(wire[i], tmp);
         getField(result, tmp, "ESSID", 7, '\"');
         strcat(wire[i], tmp);
 
-        if(strstr(result, "Cell") > strstr(result, "IE:") || !strstr(result, "Cell")){
+        if(strstr(result, "IE:") && strstr(result, "Cell") > strstr(result, "IE:")){
             strcpy(result, strstr(result, "IE:"));
             if(result[4] == 'I')
                 strcat(wire[i], "WPA2\t\0");
@@ -64,5 +58,20 @@ void Wifi::getField(char *source, char *destination, const char *field_name, int
     destination[i++] = '\t';
     if(i < 12) destination[i++] = '\t';
     destination[i] = '\0';
+}
+
+void Wifi::connect(const char *line)
+{
+    char* command = new char[128]{0};
+    char* source = new char[128];
+    char* ESSID = new char[128];
+    strcpy(source, line);
+    getField(source, ESSID, line, 25, '\t');
+    ESSID[strlen(ESSID) - 2] = '\0';
+    strcat(command, "nmcli dev wifi connect \'");
+    strcat(command, ESSID);
+    strcat(command, "\'\0");
+    system(command);
+    cout << command << endl;
 }
 
