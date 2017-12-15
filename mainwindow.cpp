@@ -2,7 +2,7 @@
 
 MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
 {
-    this->setFixedSize(500, 400);
+    this->setFixedSize(600, 350);
 
     list = new QListWidget(this);
 
@@ -18,8 +18,10 @@ void MainWindow::addInfo()
 {
     int i = 0, num = 0;
     char** wire = new char*[30];
-    while(i < 30)
-        wire[i++] = new char[256];
+    while(i < 30){
+        wire[i] = new char[256];
+        wire[i++][0] = '\0';
+    }
 
     num = Wifi::getWifiList(wire);
 

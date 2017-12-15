@@ -29,39 +29,40 @@ int Wifi::getWifiList(char** wire)
     char* result = new char[4096];
     char* tmp = new char[64];
 
-    Wifi::getCommandLine("sudo iwlist scan | grep \'ESSID\\|Address\\|BSSID\\|WPA\'", result);
+    Wifi::getCommandLine("sudo iwlist scan | grep \'ESSID\\|Address\\|Quality\\|WPA\'", result);
 
-    //cout << result << endl;
     while(strstr(result, "Cell"))
     {
-        strcpy(result, strstr(result, "Cell") + 19);
-        for(j = 0; j < 17; j++)
-            wire[i][j] = result[j];
-        wire[i][j++] = '\t';
-        wire[i][j++] = '\0';
+        getField(result, tmp, "Cell", 19, '\n');
 
-        strcpy(result, strstr(result, "ESSID") + 7);
-        for(j = 0; result[j] != '\"'; j++)
-            tmp[j] = result[j];
-        tmp[j++] = '\t';
-        tmp[j] = '\0';
-        cout << "### " << tmp << " ###" << endl;
         strcat(wire[i], tmp);
-
+        getField(result, tmp, "Quality", 8, ' ');
+        strcat(wire[i], tmp);
+        getField(result, tmp, "ESSID", 7, '\"');
+        strcat(wire[i], tmp);
 
         if(strstr(result, "Cell") > strstr(result, "IE:") || !strstr(result, "Cell")){
             strcpy(result, strstr(result, "IE:"));
-
             if(result[4] == 'I')
-                strcat(wire[i], "WPA2\t");
+                strcat(wire[i], "WPA2\t\0");
             else if(result[4] == 'W')
-                strcat(wire[i], "WPA1\t");
-
+                strcat(wire[i], "WPA1\t\0");
         }
         i++;
     }
     delete(tmp);
     delete(result);
     return i;
+}
+
+void Wifi::getField(char *source, char *destination, const char *field_name, int offset, const char last_sign)
+{
+    int i = 0;
+    strcpy(source, strstr(source, field_name) + offset);
+    for(i = 0; source[i] != last_sign; i++)
+        destination[i] = source[i];
+    destination[i++] = '\t';
+    if(i < 12) destination[i++] = '\t';
+    destination[i] = '\0';
 }
 
