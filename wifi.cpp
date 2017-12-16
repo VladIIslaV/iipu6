@@ -11,7 +11,7 @@ int Wifi::getCommandLine(const char *command, char* result)
         return 0;
     }
     int i = 0;
-    for(i = 0; fgets(tmp, 256, file); i++)
+    for(i = 0; fgets(tmp, 200, file); i++)
         strcat(result, tmp);
     pclose(file);
     delete(tmp);
@@ -21,7 +21,7 @@ int Wifi::getCommandLine(const char *command, char* result)
 int Wifi::getWifiList(char** wire)
 {
     int i = 0;
-    char* result = new char[4096];
+    char* result = new char[8192];
     char* tmp = new char[64];
 
     Wifi::getCommandLine("sudo iwlist scan | grep \'ESSID\\|Address\\|Quality\\|WPA\'", result);
@@ -30,7 +30,9 @@ int Wifi::getWifiList(char** wire)
     {
         getField(result, tmp, "Cell", 19, '\n');
         strcat(wire[i], tmp);
-        getField(result, tmp, "Quality", 8, ' ');
+        getField(result, tmp, "Signal level", 13, '\n');
+        tmp[9] = '\0';
+        cout << tmp << "\t" << strlen(tmp) << endl;
         strcat(wire[i], tmp);
         getField(result, tmp, "ESSID", 7, '\"');
         strcat(wire[i], tmp);
@@ -72,6 +74,5 @@ void Wifi::connect(const char *line)
     strcat(command, ESSID);
     strcat(command, "\'\0");
     system(command);
-    cout << command << endl;
 }
 

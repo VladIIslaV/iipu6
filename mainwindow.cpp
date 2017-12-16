@@ -4,7 +4,7 @@ void MainWindow::timer(MainWindow *parent)
 {
     while(true){
         emit(parent->addInfo());
-        sleep(7);
+        sleep(5);
     }
 }
 
@@ -30,7 +30,8 @@ void MainWindow::addInfo()
     char** wire = new char*[30];
     while(i < 30){
         wire[i] = new char[256];
-        wire[i++][0] = '\0';
+        wire[i][0] = '\0';
+        i++;
     }
 
     num = Wifi::getWifiList(wire);
